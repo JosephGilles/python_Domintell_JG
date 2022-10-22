@@ -67,9 +67,26 @@ class DomintellParser(object):
         
         'APPINFO'
         module_type = data[0:3]
-        serial_number = data[3:9].strip()
-        data_type = data[9:10]
-        data_string = data[10:].rstrip()
+
+        if module_type == 'DAL':   
+            module_type = 'DIM'         
+            serial_number = 'DA' + data[10:12].strip() + data[7:9].strip()            
+            data_type = data[12:13]
+            data_string = data[13:15].strip() + ' 0 0 0 0 0 0 0'
+            #self.logger.info("Message Jo2 - Message Entree - Serial: ")
+            #self.logger.info(serial_number)
+        
+        elif module_type == 'VAR' and data[9:10] =='D':  # a remettre en "D"  
+            module_type = 'DIM'         
+            serial_number = ('FF' + data[7:9]).replace (' ','0') 
+            self.logger.info(serial_number)
+            data_type = data[9:10]
+            data_string = data[10:12].strip() + ' 0 0 0 0 0 0 0'
+
+        else:
+            serial_number = data[3:9].strip()
+            data_type = data[9:10]
+            data_string = data[10:].rstrip()
 
         i = ['INF', '!! ']
 
@@ -121,7 +138,4 @@ class DomintellParser(object):
         return 0 not in [c in str for c in set]
     
     def contains_any(self, str, set):
-        return 1 in [c in str for c in set]
-
-    
-
+        return 1 in [c in str for c in set]   
