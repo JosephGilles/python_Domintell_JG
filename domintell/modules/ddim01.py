@@ -1,21 +1,14 @@
-"""
-Dimmer control module DDIM01
-Controlls up to 8 dimmers DD500, DD750, DD1000 and DD10V
-
-:author: Zilvinas Binisevicius <zilvinas@binis.me>
-"""
 import domintell
 import domintell.messages
+import logging
 
 
 class DDIM01Module(domintell.Module):
-    """
-    Dimmer control module DDIM01    
-    """
     COMMAND_CODE = 'DIM'
 
     def __init__(self, serial_number, controller):
         domintell.Module.__init__(self, serial_number, controller)
+        self.logger = logging.getLogger('domintell')
 
     def is_on(self, channel):
         if channel < self.number_of_channels():
@@ -30,6 +23,23 @@ class DDIM01Module(domintell.Module):
     def set_value(self, channel, value):
         if channel < self.number_of_channels():
             message = domintell.SetAnalogOutputMessage(self.get_module_code(), self.get_serial_number(), channel, value)
+
+            if message.serialNumber[0:2] == 'DA':
+                message._channel = int(message.serialNumber[2:4], base=16) -1
+                message.serialNumber = message.serialNumber[4:6]   
+
+                if message._channel >= 9:   
+                    message.moduleType = 'DAL '
+                else:
+                    message.moduleType = 'DAL' 
+
+                self._controller.send(message)
+            
+            if message.serialNumber[0:2] == 'FF':
+                message.serialNumber = message.serialNumber[2:4] 
+                message.moduleType = 'VAR'
+                message._channel = -1             
+
             self._controller.send(message)
 
     def turn_on(self, channel):
@@ -39,13 +49,11 @@ class DDIM01Module(domintell.Module):
         self.set_value(channel, 0)
     
     def number_of_channels(self):
-        return 8
+        return 32
 
     def _on_message(self, message):
         if isinstance(message, domintell.DDIMStatusMessage):
-            # got DDIM status message (contains all channels)
             self._values = message.get_values()
-
             for ch in range(0, self.number_of_channels()):
                 if ch in self._callbacks:
                     for callback in self._callbacks[ch]:
