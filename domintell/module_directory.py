@@ -13,6 +13,7 @@ MODULE_DIRECTORY = {
     'BIR': { 'type': 'DBIR01', 'name': '8 relay output module', 'io': 'do'},
     'TRP': { 'type': 'DTRP01', 'name': 'Output card for the control of up to 4 trip switches', 'io': 'do'},
     'TPV': { 'type': 'DTRP02', 'name': 'Output card for the control of 2 x 2 inverted trip switches', 'io': 'do'},    
+    'DAL': { 'type': 'DAL01', 'name': 'Control module for up to 64 dimmers', 'io': 'ao'},
     'DIM': { 'type': 'DDIM01', 'name': 'Control module for up to 8 dimmers', 'io': 'ao'},
     'TE1': { 'type': 'DTEM01', 'name': 'Temperature sensor module. Allows the connection of the temperature sensor', 'io': 't'},
     'TE2': { 'type': 'DTEM02', 'name': 'Temperature sensor module. Allows the connection of the temperature sensor', 'io': 't'},
@@ -47,9 +48,13 @@ def get_point_id(module_code, serial_number, channel=-1):
 
     if not isinstance(channel, int):
         channel = -1
-        
-    if channel > -1 and channel < 8:
-        channel += 1  # we use 0 based index internally confert to 1 based for domintell
-        pid = "{}-{}".format(se_no, channel)
+
+    if channel > -1:        
+        channel += 1
+
+        if channel < 10:
+            pid = "{}-{}".format(se_no, channel)  
+        else:
+            pid = "{}-{}".format(se_no, hex(channel)[2:].zfill(2).upper())
 
     return pid
