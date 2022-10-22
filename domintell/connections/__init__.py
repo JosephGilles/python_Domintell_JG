@@ -22,7 +22,6 @@ class Protocol(serial.threaded.Protocol):
         # pylint: disable-msg=E1101
         self.parser(data)
 
-
 class DomintellException(Exception):
     """Domintell Exception."""
     def __init__(self, value):
@@ -31,7 +30,6 @@ class DomintellException(Exception):
 
     def __str__(self):
         return repr(self.value)
-
 
 class RS232Connection(domintell.DomintellConnection):
     """
@@ -198,9 +196,6 @@ class UDPConnection(domintell.DomintellConnection):
             time.sleep(self.SLEEP_TIME)
             if callback:
                 callback()
-
-# rm /usr/local/lib/python3.10/site-packages/domintell/connections/__init__.py; nano /usr/local/lib/python3.10/site-packages/domintell/connections/__init__.py
-
 
     def ping_daemon(self):
         """Put ping message into write thread every 60 sec"""
